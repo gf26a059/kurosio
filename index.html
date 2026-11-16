@@ -318,7 +318,7 @@ addEventListener('resize',rs);rs();
 
 /* ---------- audio ---------- */
 let AC=null,mute=false,NB=null,MG=null,MF=null,RV=null,VO=0,AMB=null,HUM=null;const lastS={};
-const GAP={hit:.028,crit:.05,kill:.032,coin:.045,shot:.04,slash:.05,zap:.06,pulse:.07,boom:.09,whoosh:.08};
+const GAP={hit:.028,crit:.05,kill:.032,coin:.045,coinS:.12,shot:.04,slash:.05,zap:.06,pulse:.07,boom:.09,whoosh:.08};
 function initAudio(){try{if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();const sr=AC.sampleRate;
   NB=AC.createBuffer(1,sr*1.5|0,sr);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
   MG=AC.createGain();MG.gain.value=mute?0:.8;MF=AC.createBiquadFilter();MF.type='lowpass';MF.frequency.value=20000;MF.Q.value=.7;
@@ -342,7 +342,8 @@ function sfx(k,wx){if(!AC||mute)return;const n=performance.now();if(n-(lastS[k]|
  else if(k=='hit'){const o=bus(pan,0),f=r();O(o,'square',1900*f,500,.022,.03);O(o,'triangle',260*f,110,.07,.08);N(o,.035,3200,700,.07,'lowpass',.8)}
  else if(k=='crit'){const o=bus(pan,.3);O(o,'sine',2637,2637,.22,.07);O(o,'sine',3951,3951,.16,.04,.005);O(o,'triangle',330,90,.1,.12);N(o,.06,6000,2000,.08,'highpass',1)}
  else if(k=='kill'){const o=bus(pan,.1),f=r();O(o,'sine',170*f,42,.2,.2);N(o,.16,2600,260,.16,'lowpass',1.2);O(o,'sine',700*f,1500*f,.05,.035,.03)}
- else if(k=='coin'){const o=bus(pan,.35),f=PENTA[Math.random()*PENTA.length|0];O(o,'sine',f,f,.28,.06);O(o,'sine',f*2.76,f*2.76,.12,.025)}
+ else if(k=='coinS'){const o=bus(pan,.2),f=PENTA[Math.random()*PENTA.length|0];O(o,'sine',f,f,.12,.018);O(o,'sine',f*2.76,f*2.76,.06,.007)}
+  else if(k=='coin'){const o=bus(pan,.35),f=PENTA[Math.random()*PENTA.length|0];O(o,'sine',f,f,.28,.06);O(o,'sine',f*2.76,f*2.76,.12,.025)}
  else if(k=='item'){const o=bus(pan,.45);[1318,1760,2637].forEach((f,i)=>O(o,'sine',f,f,.35,.06,i*.06));N(o,.4,9000,6000,.03,'highpass',.7)}
  else if(k=='buy'){const o=bus(0,.15);O(o,'triangle',880,880,.05,.07);O(o,'triangle',1320,1320,.08,.06,.05);N(o,.02,4000,2000,.05,'bandpass',2)}
  else if(k=='no'){const o=bus(0,0),f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=900;f.connect(o);O(f,'square',140,138,.14,.07);O(f,'square',147,145,.14,.07)}
@@ -523,7 +524,8 @@ function waveStart(){show(null);G.wave++;M=mods();const w=G.wave,bk=BOSS[w];Wv={
   14:[['manbou',28],['echizen',22],['takaashi',15],['saw',10],['gusoku',6],['saw',4]]};for(const[k,at]of MS[w]||[])Wv.sched.push({at,k})}
  Wv.trash=w>=11?.3:w>=8?.55:1;Wv.mc=0;
  if(w==WAVES){const ks=['saw','gusoku','angler','manbou','takaashi','echizen'];for(let i=0;i<50;i++)Wv.sched.push({at:57-i*1.05,k:ks[Math.random()*ks.length|0],q:1})}
- if(bk){const a=R(TAU);if(EN[bk].cable)spawn(bk,0,0);else spawn(bk,Math.cos(a)*420,Math.sin(a)*420);banner={t:2.4,T:2.4,big:EN[bk].n,sub:`WAVE ${w} ── ${EN[bk].en}`};sfx('boss')}
+ if(bk=='kraken')for(let i=0;i<10;i++)Wv.sched.push({at:54-i*5,k:'gusoku'});
+  if(bk){const a=R(TAU);if(EN[bk].cable)spawn(bk,0,0);else spawn(bk,Math.cos(a)*420,Math.sin(a)*420);banner={t:2.4,T:2.4,big:EN[bk].n,sub:`WAVE ${w} ── ${EN[bk].en}`};sfx('boss')}
  else banner={t:1.8,T:1.8,big:`第${KAN[w]}波`,sub:`WAVE ${String(w).padStart(2,'0')} / ${WAVES}`};st='fight'}
 function buildAlly(u){const fc={},st={spd:0,atk:0,rng:0,crit:0,hp:0,g:0};for(const q of u.eq||[]){const o=itemStat(q);for(const k in o)st[k]+=o[k];if(ADV[q])fc[q]=(fc[q]||0)+1}
  const ks=Object.keys(ADV).filter(k=>k!='shell+shell');for(let i=0;i<(fc['shell+shell']||0)*2;i++){const k=ks[Math.random()*ks.length|0];fc[k]=(fc[k]||0)+1}
@@ -535,7 +537,7 @@ function aM(a){const f=k=>a.fc[k]||0,mel=MEL.has(a.d.k);let m=1+a.st.atk+a.aSt;
  if(f('fin+flower')&&G.hp>=G.maxHp*.7)m+=.4*f('fin+flower');if(f('fang+flower')&&a.kills>=5)m+=.4*f('fang+flower');
  m+=.12*a.star*f('fang+glow')+f('fang+fang')*(mel?.9:.6)+(mel?0:.6*f('harp+harp'));return m*(1+M.teamAtk)}
 function aS(a){const f=k=>a.fc[k]||0;return 1+a.st.spd+a.sSt+(Wv.el<10?.6*f('fin+harp'):0)+(BUFF>0?.2:0)+.12*a.star*f('fang+glow')+(a.d.gauge?0:.25*f('glow+glow'))+(a.star==3?.4:0)}
-function spawn(k,px,py,el){const t=EN[k],w=G.wave,hm=t.boss?1:(1+.13*(w-1)+.006*(w-1)**2)*(el?4:1);
+function spawn(k,px,py,el){const t=EN[k],w=G.wave,hm=t.boss?1.5:(1+.13*(w-1)+.006*(w-1)**2)*(el?4:1);
  const e={t,x:px,y:py,hp:t.hp*hm,m:t.hp*hm,vx:0,vy:0,hc:0,ph:R(TAU),tel:t.boss||t.mid?1.4:.7,f:1,sc:t.sc||(el?1.4:1),stun:0,rot:0,lead:null,r:t.r*(el?1.3:1),el:!!el,dn:0,dnT:0,crit:0,slow:0,
   bs:t.ai=='ambush'?'hidden':'chase',bt:t.boss?2:R(1,2.4),mi:0,da:0,sub:0,sa:0,dead:0,dir:Math.random()<.5?1:-1,al:1,ink:0,frz:0,hide:0,la:0,life:0,vx0:0,vy0:0,col:t.boss||t.mid?'#fff':el?'#ecece8':'#9c9c99'};E.push(e);return e}
 function spawnPos(min=270){for(let i=0;i<12;i++){const a=R(TAU),r=Math.sqrt(Math.random())*(AR-40),px=Math.cos(a)*r,py=Math.sin(a)*r,d=Math.hypot(px-P.x,py-P.y);if(d>min&&d<680)return[px,py]}
@@ -660,7 +662,7 @@ function allyAct(a,tg,dt){const d=a.d,k=d.k,aw=a.star==3,dm=d.dmg*a.m*M.ally*(k=
  if(k=='coin'){if(a.cd<=0){a.cd=d.cd;C.push({x:a.x,y:a.y,v:a.star,ph:R(6)});a.an=1}
   if(a.star<2)return;const t=near(a.x,a.y,380);if(!t)return;
   if((a.bud=(a.bud||0)-dt)<=0){if(G.coins<1)return;G.coins--;a.bud=a.star==3?1:2;FX.push({k:'n',x:a.x,y:a.y-18,s:'◆-1',l:.5,L:.5})}
-  if((a.sub+=dt)>=(a.star==3?.035:.07)){a.sub=0;const an=Math.atan2(t.y-a.y,t.x-a.x),q=an+R(-.4,.4),sp=R(320,560);B.push({k:'coin',x:a.x,y:a.y,vx:Math.cos(q)*sp,vy:Math.sin(q)*sp,a:q,l:R(.45,.85),dmg:dm,p:1,hit:new Set(),r:7});sfx('coin')}return}
+  if((a.sub+=dt)>=(a.star==3?.035:.14)){a.sub=0;const an=Math.atan2(t.y-a.y,t.x-a.x),q=an+R(-.4,.4),sp=R(320,560);B.push({k:'coin',x:a.x,y:a.y,vx:Math.cos(q)*sp,vy:Math.sin(q)*sp,a:q,l:R(.45,.85),dmg:dm,p:1,hit:new Set(),r:7});sfx('coinS',a.x)}return}
  if(k=='top'){if((a.sub+=dt*aS(a))>.22){a.sub=0;for(const e of E){if(e.dead||e.tel>0||e.hide)continue;const q=Math.hypot(e.x-a.x,e.y-a.y)||1;if(q<d.rad+e.r)hurt(e,dm,(e.x-a.x)/q*140,(e.y-a.y)/q*140)}}
   if(aw&&a.cd<=0){a.cd=1;for(let i=0;i<4;i++){const q=a.rot+i*TAU/4;B.push({k:'wave',x:a.x,y:a.y,vx:Math.cos(q)*480,vy:Math.sin(q)*480,a:q,l:.5,dmg:dm*1.5,p:99,hit:new Set(),r:26})}}return}
  if(k=='roam'){if(a.cd>0||!tg||Math.hypot(tg.x-a.x,tg.y-a.y)>tg.r+26)return;a.cd=d.cd;a.an=1;const an=Math.atan2(tg.y-a.y,tg.x-a.x);
