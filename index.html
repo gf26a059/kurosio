@@ -583,7 +583,7 @@ function hurt(e,d,kx=0,ky=0,src='a'){if(e.dead||e.tel>0||e.hide)return;const p=M
   if(CUR&&(CUR.id=='shiro'||CUR.id=='uni')&&e.ink>=5&&!e.dead&&T>=(CUR.detT||0)){CUR.detT=T+2;inkDet(e,CUR)}}
  if(e.hp<=0&&!e.dead){const ov=-e.hp;kill(e);if(p('overkill')&&ov>2){const o=near(e.x,e.y,170);if(o)hurt(o,ov*.5*p('overkill'),0,0,'x')}}}
 function inkMul(e){return 1-Math.min(.5,(e.ink||0)*.025)}
-function inkDet(e,a){const n=e.ink,r=80+n*5,dm=n*a.d.dmg*a.m*M.ally*aM(a);e.ink=0;FX.push({k:'ring',x:e.x,y:e.y,R:r,l:.55,L:.55,w:9,dots:1});FX.push({k:'ring',x:e.x,y:e.y,R:r*.55,l:.4,L:.4,w:4});burst(e.x,e.y,40,'#fff',420);shake=Math.max(shake,16);flash=Math.max(flash,.25);sfx('boom',e.x);FX.push({k:'n',x:e.x,y:e.y-e.r-20,s:'起爆',l:1,L:1,big:1});
+function inkDet(e,a){const n=e.ink,r=80+n*5,dm=1.2*n*a.d.dmg*a.m*M.ally*aM(a);e.ink=0;FX.push({k:'ring',x:e.x,y:e.y,R:r,l:.55,L:.55,w:9,dots:1});FX.push({k:'ring',x:e.x,y:e.y,R:r*.55,l:.4,L:.4,w:4});burst(e.x,e.y,40,'#fff',420);shake=Math.max(shake,16);flash=Math.max(flash,.25);sfx('boom',e.x);FX.push({k:'n',x:e.x,y:e.y-e.r-20,s:'起爆',l:1,L:1,big:1});
  for(const o of E){if(o.dead||o.tel>0||o.hide)continue;if(Math.hypot(o.x-e.x,o.y-e.y)<r+o.r){const k=o.ink;o.ink=0;hurt(o,dm+k*8,0,0,'x')}}}
 function inkBurst(e){const dm=[0,30,55,85][M.p('ink')]*(1+.12*(G.wave-1)),R0=75;FX.push({k:'ring',x:e.x,y:e.y,R:R0,l:.35,L:.35,w:5,dots:1});burst(e.x,e.y,16,'#fff',260);sfx('boom',e.x);
  for(const o of E)if(!o.dead&&Math.hypot(o.x-e.x,o.y-e.y)<R0+o.r)hurt(o,dm,0,0,'x')}
@@ -595,7 +595,7 @@ function kill(e){e.dead=1;stats.kills++;if(CUR)CUR.kills++;const t=e.t;num(e.x,e
  if(M.h('fugu')&&!t.boss&&!t.mid&&Math.random()<.05)smallBoom(e.x,e.y);
  if(t.ai=='roll')for(let i=0;i<6;i++)ebul(e.x,e.y,i*TAU/6+e.rot,170,t.d);
  if(t.boss){for(let i=0;i<6;i++)C.push({x:e.x+R(-90,90),y:e.y+R(-90,90),v:1,ph:R(6)});addItems(rBase(),rBase(),'emb:'+Object.keys(SYN)[Math.random()*7|0]);FX.push({k:'n',x:e.x,y:e.y-e.r-30,s:'装備 +2・紋章 +1',l:2,L:2,big:1});addXp(4);flash=.9;slow=.9;shake=26;sfx('boss');sfx('boom',e.x);Wv.bossDead=1;banner={t:2,T:2,big:'討伐',sub:`${t.en} DEFEATED ── SURVIVE THE REST`}}
- else if(t.mid){for(let i=0;i<3;i++)C.push({x:e.x+R(-60,60),y:e.y+R(-60,60),v:1,ph:R(6)});if(Math.random()<.6){const q=rBase();addItems(q);FX.push({k:'n',x:e.x,y:e.y-e.r-24,s:'装備 '+BI[q].n,l:1.6,L:1.6,big:1});sfx('item',e.x)}if(addXp(2))FX.push({k:'n',x:P.x,y:P.y-44,s:'LEVEL UP',l:1.4,L:1.4,big:1});flash=.35;slow=.35;shake=18;sfx('boom',e.x)}
+ else if(t.mid){for(let i=0;i<3;i++)C.push({x:e.x+R(-60,60),y:e.y+R(-60,60),v:1,ph:R(6)});if(Math.random()<.6){const q=rBase();addItems(q);FX.push({k:'n',x:e.x,y:e.y-e.r-24,s:'装備 '+BI[q].n,l:1.6,L:1.6,big:1});sfx('item',e.x)}if(addXp(2))FX.push({k:'n',x:P.x,y:P.y-44,s:'LEVEL UP',l:1.4,L:1.4,big:1});flash=.35;shake=18;sfx('boom',e.x)}
  else{if(e.el)C.push({x:e.x,y:e.y,v:1,ph:R(6)});else if(Math.random()<t.coin*.4*M.coinM)C.push({x:e.x,y:e.y,v:1,ph:R(6)});sfx('kill',e.x)}}
 function heal(n){const h=Math.max(0,Math.min(n,G.maxHp-G.hp));G.hp+=h;const ov=n-h;if(ov>0&&M.p('over'))G.sh=Math.max(G.sh,Math.min(15*M.p('over'),G.sh+ov))}
 function hitP(d){if(P.inv>0||Wv.done)return;let dm=Math.round(d*(1+.035*(G.wave-1)));if(G.sh>0){const a=Math.min(G.sh,dm);G.sh-=a;dm-=a}G.hp-=dm;P.inv=M.inv;shake=Math.max(shake,12);flash=Math.max(flash,.22);sfx('hurt');burst(P.x,P.y,10,'#fff');if(M.h('uni')){for(const e of E)if(!e.dead&&!e.hide&&e.tel<=0&&Math.hypot(e.x-P.x,e.y-P.y)<90+e.r)hurt(e,30*(1+.1*(G.wave-1)),0,0,'x');FX.push({k:'ring',x:P.x,y:P.y,R:90,l:.25,L:.25,w:3,dots:1})}
@@ -1002,7 +1002,7 @@ function hud(){const w=G.wave,m=16;x.textBaseline='top';
 
 /* ---------- loop / input ---------- */
 function tick(dt){T+=dt;audioTick();
- if(st=='fight'){if(hs>0)hs-=dt;else upd(slow>0?dt*.3:dt);if(slow>0)slow-=dt}
+ if(st=='fight'){hs=0;upd(slow>0?dt*.3:dt);if(slow>0)slow-=dt}
  else if(st=='title'||st=='pick')cam.x+=dt*18;
  if(st=='shop'||st=='dead')fxUpd(dt);
  if(banner&&st!='pause'&&(banner.t-=dt)<=0)banner=null;
